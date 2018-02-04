@@ -3,7 +3,7 @@
 const express = require('express');
 const nconf = require('nconf');
 
-const productRepo = require('./repos/product.repo')
+const productRepo = require('./repos/product.repo');
 
 
 nconf.argv().env().file('conf.json').defaults({
@@ -11,7 +11,7 @@ nconf.argv().env().file('conf.json').defaults({
   repo: {
     fs: {
       persistDelay: 50,
-      filePath: '/tmp/testNode.json'
+      filePath: '/tmp/testGoogleVision.repo.json'
     }
   }
 });
@@ -31,7 +31,7 @@ Promise.all([configureProductRepo()]).then(() => {
     console.error(err.stack);
     next(err);
   });
-  app.use(function (err, req, res, next) {
+  app.use(function (err, req, res) {
     res.status(500).send({error: err.message});
   });
   app.listen(nconf.get('PORT'), () => {
