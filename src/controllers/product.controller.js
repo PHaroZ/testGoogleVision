@@ -137,7 +137,7 @@ async function suggestByColor(req, res, next) {
     next(error);
   }
 
-  cu.resOk(res, {products: products});
+  cu.resOk(res, products);
 }
 
 /**

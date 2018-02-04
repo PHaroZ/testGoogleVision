@@ -59,9 +59,9 @@ async function listByNearestColor(product, limit) {
   let results = [];
   candidates.forEach(candidate => {
     const c2 = candidate.colorLab;
-    if (product.id != candidate.id && c2) {
+    if (product.id !== candidate.id && c2) {
       // compute proximity, least is the best
-      const prox = Math.pow(c1[0] - c2[0], 2) + Math.pow(c1[1] - c2[1], 2) + Math.pow(c1[2] - c2[2], 2);
+      const prox = Math.sqrt(Math.pow(c1[0] - c2[0], 2) + Math.pow(c1[1] - c2[1], 2) + Math.pow(c1[2] - c2[2], 2));
       let keepIt;
       if (results.length < limit) {
         // keep the first candidates until we reach the limit
@@ -79,13 +79,13 @@ async function listByNearestColor(product, limit) {
         results.push({prox: prox, product: candidate});
         // sort current result by prox ASC
         results.sort((a, b) => {
-          return a.prox < b.prox ? -1 : (a.prox == b.prox ? 0 : 1);
+          return a.prox < b.prox ? -1 : (a.prox === b.prox ? 0 : 1);
         });
-        maxProx = results[results.length - 1];
+        maxProx = results[results.length - 1].prox;
       }
     }
   });
-  return results;
+  return results.map(result => result.product);
 }
 
 /**
