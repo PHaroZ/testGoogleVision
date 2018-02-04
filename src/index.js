@@ -3,20 +3,41 @@
 const express = require('express');
 const nconf = require('nconf');
 
+const productRepo = require('./repos/product.repo')
+
+
 nconf.argv().env().file('conf.json').defaults({
-    PORT: 3000
+  PORT: 3000,
+  repo: {
+    fs: {
+      persistDelay: 50,
+      filePath: '/tmp/testNode.json'
+    }
+  }
 });
 
+async function configureProductRepo() {
+  console.time('noteRepo.reloadAll');
+  await productRepo.init();
+  console.timeEnd('noteRepo.reloadAll');
+}
 
-const app = express();
-app.use('/api/private', require('./routes/api.private.route'));
-app.use(function (err, req, res, next) {
+
+Promise.all([configureProductRepo()]).then(() => {
+
+  const app = express();
+  app.use('/api/private', require('./routes/api.private.route'));
+  app.use(function (err, req, res, next) {
     console.error(err.stack);
     next(err);
-});
-app.use(function (err, req, res, next) {
+  });
+  app.use(function (err, req, res, next) {
     res.status(500).send({error: err.message});
-});
-app.listen(nconf.get('PORT'), () => {
+  });
+  app.listen(nconf.get('PORT'), () => {
     console.log('web server started');
+  });
+
+}).catch((err) => {
+  console.error('could not init app', err);
 });
