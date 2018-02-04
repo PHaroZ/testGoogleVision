@@ -64,4 +64,13 @@ async function initFromCsv(req, res, next) {
   }
 }
 
-module.exports = {initFromCsv};
+async function loadMainColors(req, res, next) {
+  const limit = req.query.limit === undefined ? null : parseInt(req.query.limit, 10);
+  if (null !== limit && (isNaN(limit) || limit <= 0)) {
+    return cu.res4xx(res, 400, 'query string param named "limit" have to be a number > 0');
+  }
+  //TODO
+  cu.resOk(res);
+}
+
+module.exports = {initFromCsv, loadMainColors};
