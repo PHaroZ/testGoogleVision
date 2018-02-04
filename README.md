@@ -12,9 +12,10 @@ Data are load in memory and persisted to a single file.
 ## Configuration
 Configuration can be done via environement variables or via a json file called "conf.json" at the root level.
 Available options are :
-- **PORT** `number`, port number where web service will be accessible, by default `3000`
-- **repo:fs:persistDelay** `number`, data persistence is deffered after modification by this delay (in order to avoid to much IO at bulk loading phase), by default `50` ms
-- **repo:fs:filePath** `path`, file path where to persist data, by default `/tmp/testGoogleVision.repo.json`
+- **PORT** `number` port number where web service will be accessible, by default `3000`
+- **GOOGLE_APPLICATION_CREDENTIALS** `path` required,  file path which contains your Google Cloud API key, see https://cloud.google.com/docs/authentication/getting-started for more detail
+- **repo:fs:persistDelay** `number` data persistence is deffered after modification by this delay (in order to avoid to much IO at bulk loading phase), by default `50` ms
+- **repo:fs:filePath** `path` file path where to persist data, by default `/tmp/testGoogleVision.repo.json`
 
 ## Run
 To run the service as web server, within the root project folder, simply launch

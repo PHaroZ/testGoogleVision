@@ -10,6 +10,16 @@ async function create(data) {
 }
 
 /**
+ * update the main color of a product
+ * @param product
+ * @returns {Promise<void>}
+ */
+async function updateMainColor(product, color) {
+  product.color = color;
+  await productRepo.save(product);
+}
+
+/**
  * count all products
  * @returns {Promise<void>}
  */
@@ -34,4 +44,4 @@ async function clearAll() {
   return await productRepo.clearAll();
 }
 
-module.exports = {create, clearAll, countAll, list};
+module.exports = {create, clearAll, countAll, list, updateMainColor};

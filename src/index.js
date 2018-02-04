@@ -7,6 +7,7 @@ const productRepo = require('./repos/product.repo');
 
 
 nconf.argv().env().file('conf.json').defaults({
+  GOOGLE_APPLICATION_CREDENTIALS : undefined,
   PORT: 3000,
   repo: {
     fs: {
