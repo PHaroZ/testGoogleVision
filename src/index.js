@@ -9,6 +9,7 @@ nconf.argv().env().file('conf.json').defaults({
 
 
 const app = express();
+app.use('/api/private', require('./routes/api.private.route'));
 app.use(function (err, req, res, next) {
     console.error(err.stack);
     next(err);
