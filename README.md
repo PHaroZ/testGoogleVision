@@ -12,9 +12,9 @@ Data are load in memory and persisted to a single file.
 ## Configuration
 Configuration can be done via environement variables or via a json file called "conf.json" at the root level.
 Available options are :
-- **PORT** number, port number where web service will be accessible, by default 3000
-- **repo:fs:persistDelay** number, data persistence is deffered after modification by this delay (in order to avoid to much IO at bulk loading phase), by default 50ms
-- **repo:fs:filePath** path, file path where to persist data, by default /tmp/testGoogleVision.repo.json
+- **PORT** `number`, port number where web service will be accessible, by default `3000`
+- **repo:fs:persistDelay** `number`, data persistence is deffered after modification by this delay (in order to avoid to much IO at bulk loading phase), by default `50` ms
+- **repo:fs:filePath** `path`, file path where to persist data, by default `/tmp/testGoogleVision.repo.json`
 
 ## Run
 To run the service as web server, within the root project folder, simply launch
@@ -23,6 +23,7 @@ npm install ; npm start
 ```
 After that you have to
 1. load initial data with a call to _/api/private/product/initFromCsv_
+
 (see bellow for more details about API)
 
 ## API documentation
@@ -32,7 +33,7 @@ App expose some REST end points :
 #### `GET /api/private/product/initFromCsv`
 Clear all previsously loaded datas and load new ones from a CSV file (products.csv)
 ##### Query string params :
-- **file** String, required. Path (on nodejs server) to CSV file which contains data to load. CSV must have ";" as delimiter, use "\r\n" as new line and have an header line with, at least, this columns : _id;title;gender_id;composition;sleeve;photo;url_
+- **file** `String`, required. Path (on nodejs server) to CSV file which contains data to load. CSV must have ";" as delimiter, use "\r\n" as new line and have an header line with, at least, this columns : _id;title;gender_id;composition;sleeve;photo;url_
 ##### Reponse :
 - **HTTP 200** - {"success":true,"data":{"total":_xxx_}} where _xxx_ is the total number of product in the storage after the operation.
 ##### Example :
