@@ -27,17 +27,40 @@ async function initFromCsv(req, res, next) {
   }
 
   try {
-    const csvParser = csv({objectMode: true, delimiter: ';',columns:true}).on('data', function (data) {
-      productService.create(data);
+    await productService.clearAll();
+
+    const csvParser = csv({
+      objectMode: true,
+      delimiter: ';',
+      columns: true,
+      newline: '\r\n'
+    }).on('data', function (data) {
+      const product = {
+        id: data.id,
+        title: data.title,
+        gender_id: data.gender_id,
+        composition: data.composition,
+        sleeve: data.sleeve,
+        photo: 'http:' + data.photo,
+        url: data['url']
+      };
+      productService.create(product);
+    })
+    var end = new Promise(function (resolve, reject) {
+      csvParser.on('end', resolve);
+      csvParser.on('error', reject);
     });
     fs.createReadStream(csvFilePath).pipe(csvParser);
 
+    await end;
   } catch (error) {
     next(error);
   }
 
   {
-    cu.resOk(res);
+    cu.resOk(res, {
+      total: await productService.countAll()
+    });
   }
 }
 

@@ -9,4 +9,21 @@ async function create(data) {
   await productRepo.save(data);
 }
 
-module.exports = {create};
+/**
+ * count all product
+ * @returns {Promise<void>}
+ */
+async function countAll() {
+  const list = await productRepo.list();
+  return list.length;
+}
+
+/**
+ * clear all product
+ * @returns {Promise<void>}
+ */
+async function clearAll() {
+  return await productRepo.clearAll();
+}
+
+module.exports = {create, clearAll, countAll};

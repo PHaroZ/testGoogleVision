@@ -31,14 +31,62 @@ async function init() {
   });
 }
 
+async function clearAll() {
+  store = {};
+}
+
 /**
  * save a product
  * @param data
  * @returns {Promise<void>}
  */
 async function save(data) {
-  console.log('TODO save', data)
-  //TODO
+  store[data.id] = data;
+  persistDeffered();
 }
 
-module.exports = {save};
+async function list() {
+  return Object.values(store);
+}
+
+/**
+ * @private
+ * buffer store saving
+ */
+function persistDeffered() {
+  if (!persistTimeout) {
+    persistTimeout = setTimeout(() => {
+      persistTimeout = null;
+      if (persistInProgress) {
+        persistDeffered();
+      } else {
+        persistInProgress = true;
+        persist().then(() => {
+          persistInProgress = false;
+        }).catch((err) => {
+          console.error('persist fail', err);
+          process.exit(1);
+        });
+      }
+    }, persistDelay);
+  }
+}
+
+/**
+ * @private
+ * save store to file
+ * @returns {Promise<any>}
+ */
+async function persist() {
+  return new Promise(function (resolve, reject) {
+    fs.writeFile(filePath, JSON.stringify(store), (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+}
+
+module.exports = {init, clearAll, save, list};

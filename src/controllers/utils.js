@@ -13,7 +13,7 @@ module.exports = {
    * build standard HTML response with status 200
    * @param res
    */
-  resOk: function (res) {
-    res.send({success: true});
+  resOk: function (res, data) {
+    res.send({success: true, data: data});
   }
 };
