@@ -86,9 +86,9 @@ async function loadMainColors(req, res, next) {
     let noQueued = 0;
     (await productService.list()).some(function (product, index) {
       if (!product.color) {
-        queue.add(0, loadAndUpdateProductColor, [product]);
         noQueued++;
-        if (noQueued >= limit) {
+        queue.add(0, loadAndUpdateProductColor, [product, noQueued]);
+        if (null != limit && noQueued >= limit) {
           return true;
         }
       }
@@ -102,7 +102,7 @@ async function loadMainColors(req, res, next) {
   }
 }
 
-async function loadAndUpdateProductColor(product) {
+async function loadAndUpdateProductColor(product, index) {
   return new Promise(function (resolve, reject) {
     try {
       googleVisionClient
@@ -111,6 +111,7 @@ async function loadAndUpdateProductColor(product) {
           try {
             const color = results[0].imagePropertiesAnnotation.dominantColors.colors[0].color;
             productService.updateMainColor(product, color);
+            console.log("color loaded for " + index);
             resolve(product);
           } catch (error) {
             reject(error);
