@@ -1,0 +1,15 @@
+{
+  "PORT": 3000,
+  "googleCloud": {
+    "credentials": "/tmp/visionTest.key.json",
+    "maxConcurrency": {
+      "vision": 5
+    }
+  },
+  "repo": {
+    "fs": {
+      "persistDelay": 50,
+      "filePath": "/tmp/testGoogleVision.repo.json"
+    }
+  }
+}

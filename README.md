@@ -10,13 +10,13 @@ Data are load in memory and persisted to a single file.
 * A Google Cloud Platform account which can be used with Cloud Vision API, see https://cloud.google.com/vision/ for more details.
 
 ## Configuration
-Configuration can be done via environement variables or via a json file called "conf.json" at the root level.
+Configuration can be done via environement variables or via a json file called "conf.json" at the root level (see conf.sample.json for an example).
 Available options are :
 - **PORT** `number` port number where web service will be accessible, by default `3000`
 - **googleCloud:credentials** `path` required, file path which contains your Google Cloud API key, see https://cloud.google.com/docs/authentication/getting-started for more detail (corresponds to google's GOOGLE_APPLICATION_CREDENTIALS)
 - **googleCloud:maxConcurrency:vision** `number` maximum number of concurrent call to Google Cloud Vision
 - **repo:fs:persistDelay** `number` data persistence is deffered after modification by this delay (in order to avoid to much IO at bulk loading phase), by default `50` ms
-- **repo:fs:filePath** `path` file path where to persist data, by default `/tmp/testGoogleVision.repo.json`
+- **repo:fs:filePath** `path` file path where to persist data, a new file will be created, the directory structure must already exist. By default `/tmp/testGoogleVision.repo.json`
 
 ## Run
 To run the service as web server, within the root project folder, simply launch
