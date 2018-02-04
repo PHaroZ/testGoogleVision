@@ -105,8 +105,7 @@ async function loadAndUpdateProductColor(product) {
     googleVisionClient
       .imageProperties(product.photo)
       .then(results => {
-        const color = results[0].imagePropertiesAnnotation.dominantColors;
-        console.dir(color);
+        const color = results[0].imagePropertiesAnnotation.dominantColors.colors[0].color;
         productService.updateMainColor(product, color);
         resolve(product);
       })
