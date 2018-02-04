@@ -121,14 +121,23 @@ async function loadMainColors(req, res, next) {
 async function suggestByColor(req, res, next) {
   const productId = req.params.id;
   const product = await productService.getById(productId);
-
   if (!product) {
     return cu.res4xx(res, 400, 'product "' + productId + '" is unknown');
   }
 
-  //TODO
+  const limit = req.query.limit === undefined ? 10 : parseInt(req.query.limit, 10);
+  if (isNaN(limit) || limit <= 0) {
+    return cu.res4xx(res, 400, 'query string param named "limit" have to be a number > 0');
+  }
 
-  return [product];
+  let products;
+  try {
+    products = await productService.listByNearestColor(product, limit);
+  } catch (error) {
+    next(error);
+  }
+
+  cu.resOk(res, {products: products});
 }
 
 /**

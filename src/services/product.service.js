@@ -40,6 +40,54 @@ async function list() {
   return productRepo.list();
 }
 
+
+/**
+ * list products by nearest color
+ * @param product ref product
+ * @param limit number of result
+ * @returns {Promise<*>}
+ */
+async function listByNearestColor(product, limit) {
+  if (!product.colorLab) {
+    return [];
+  }
+
+  const c1 = product.colorLab;
+  const candidates = await productRepo.list();
+
+  let maxProx = undefined;
+  let results = [];
+  candidates.forEach(candidate => {
+    const c2 = candidate.colorLab;
+    if (product.id != candidate.id && c2) {
+      // compute proximity, least is the best
+      const prox = Math.pow(c1[0] - c2[0], 2) + Math.pow(c1[1] - c2[1], 2) + Math.pow(c1[2] - c2[2], 2);
+      let keepIt;
+      if (results.length < limit) {
+        // keep the first candidates until we reach the limit
+        keepIt = true;
+      } else {
+        // now we must keep only which have a better proximity than leastProx
+        if (prox < maxProx) {
+          // first, we have to reject the product with the least proximity
+          results.pop(); // throw away the last one
+          keepIt = true;
+        }
+      }
+      if (keepIt) {
+        // add to result set
+        results.push({prox: prox, product: candidate});
+        // sort current result by prox ASC
+        results.sort((a, b) => {
+          return a.prox < b.prox ? -1 : (a.prox == b.prox ? 0 : 1);
+        });
+        maxProx = results[results.length - 1];
+      }
+    }
+  });
+  return results;
+}
+
 /**
  * return a product by it's id
  * @returns {Promise<void>}
@@ -56,4 +104,4 @@ async function clearAll() {
   return await productRepo.clearAll();
 }
 
-module.exports = {create, clearAll, countAll, list, updateMainColor, getById};
+module.exports = {create, clearAll, countAll, list, updateMainColor, getById, listByNearestColor};
