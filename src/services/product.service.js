@@ -1,5 +1,12 @@
 const productRepo = require('../repos/product.repo');
 const colourProximity = require('colour-proximity');
+const nconf = require('nconf');
+const vision = require('@google-cloud/vision');
+const RunQueue = require('run-queue');
+
+const googleVisionClient = new vision.ImageAnnotatorClient({
+  keyFilename: nconf.get('googleCloud:credentials')
+});
 
 
 /**
@@ -12,6 +19,80 @@ async function create(data) {
 }
 
 /**
+ * update color of each product, for which it's unknown
+ * @param limit maximum number of product to process
+ * @returns {Promise<*>} number of product processed
+ */
+async function loadAndUpdateColors(limit) {
+  const queue = new RunQueue({
+    maxConcurrency: nconf.get('googleCloud:maxConcurrency:vision')
+  });
+  let noQueued = 0;
+  (await list()).some(function (product) {
+    if (!product.color) {
+      noQueued++;
+      queue.add(0, loadAndUpdateColor, [product]);
+      if (null != limit && noQueued >= limit) {
+        return true;
+      }
+    }
+  });
+
+  if (noQueued > 0) {
+    return queue.run().then(result => {
+      return noQueued
+    });
+  } else {
+    return 0;
+  }
+}
+
+
+/**
+ * @private
+ * @param product
+ * @param index
+ * @param retryCount
+ * @returns {Promise<any>}
+ */
+async function loadAndUpdateColor(product, retryCount = 0) {
+  return new Promise(function (resolve, reject) {
+    try {
+      googleVisionClient
+        .imageProperties(product.photo)
+        .then(results => {
+          try {
+            const result = results[0];
+            if (result.error) {
+              // could occur when google can not access the URL
+              if (retryCount < 5) {
+                // retry it up to 5 times
+                loadAndUpdateColor(product, retryCount + 1).then(resolve).catch(reject);
+              } else {
+                reject(new Exception("can\'t get color for product#" + product.id + " ; google result : " + JSON.stringify(error)));
+              }
+            } else {
+              const color = results[0].imagePropertiesAnnotation.dominantColors.colors[0].color;
+              updateMainColor(product, color).then(() => {
+                console.log("color loaded for " + product.id);
+                resolve(product);
+              });
+            }
+          } catch (error) {
+            reject(error);
+          }
+        })
+        .catch(err => {
+          reject(err);
+        });
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+/**
+ * @private
  * update the main color of a product & compute its lab value
  * @param product
  * @param color color in rgb as [r, g, b] where r, g, and b are an int between 0 and 255
@@ -104,4 +185,4 @@ async function clearAll() {
   return await productRepo.clearAll();
 }
 
-module.exports = {create, clearAll, countAll, list, updateMainColor, getById, listByNearestColor};
+module.exports = {create, clearAll, countAll, list, loadAndUpdateColors, getById, listByNearestColor};
