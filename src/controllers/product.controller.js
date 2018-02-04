@@ -69,7 +69,15 @@ async function loadMainColors(req, res, next) {
   if (null !== limit && (isNaN(limit) || limit <= 0)) {
     return cu.res4xx(res, 400, 'query string param named "limit" have to be a number > 0');
   }
+
+  (await productService.list()).some(function (product, index) {
+    if (index>=limit) {
+      return true;
+    }
+    console.log(index, product);
+  });
   //TODO
+  
   cu.resOk(res);
 }
 

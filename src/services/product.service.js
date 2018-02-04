@@ -10,12 +10,20 @@ async function create(data) {
 }
 
 /**
- * count all product
+ * count all products
  * @returns {Promise<void>}
  */
 async function countAll() {
   const list = await productRepo.list();
   return list.length;
+}
+
+/**
+ * return all products
+ * @returns {Promise<void>}
+ */
+async function list() {
+  return productRepo.list();
 }
 
 /**
@@ -26,4 +34,4 @@ async function clearAll() {
   return await productRepo.clearAll();
 }
 
-module.exports = {create, clearAll, countAll};
+module.exports = {create, clearAll, countAll, list};
