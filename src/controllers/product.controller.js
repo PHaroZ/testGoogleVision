@@ -8,7 +8,7 @@ const productService = require('../services/product.service');
 const cu = require('./utils');
 
 const googleVisionClient = new vision.ImageAnnotatorClient({
-  keyFilename: nconf.get('GOOGLE_APPLICATION_CREDENTIALS')
+  keyFilename: nconf.get('googleCloud:credentials')
 });
 
 
@@ -53,8 +53,8 @@ async function initFromCsv(req, res, next) {
         url: data['url']
       };
       productService.create(product);
-    })
-    var end = new Promise(function (resolve, reject) {
+    });
+    const end = new Promise(function (resolve, reject) {
       csvParser.on('end', resolve);
       csvParser.on('error', reject);
     });
@@ -81,10 +81,10 @@ async function loadMainColors(req, res, next) {
   try {
 
     const queue = new RunQueue({
-      maxConcurrency: 10
+      maxConcurrency: nconf.get('googleCloud:maxConcurrency:vision')
     });
     let noQueued = 0;
-    (await productService.list()).some(function (product, index) {
+    (await productService.list()).some(function (product) {
       if (!product.color) {
         noQueued++;
         queue.add(0, loadAndUpdateProductColor, [product, noQueued]);
@@ -94,25 +94,38 @@ async function loadMainColors(req, res, next) {
       }
     });
 
-    await queue.run();
-    cu.resOk(res);
+    if (noQueued > 0) {
+      await queue.run();
+    }
+    cu.resOk(res, {noColorLoaded: noQueued});
 
   } catch (error) {
     next(error);
   }
 }
 
-async function loadAndUpdateProductColor(product, index) {
+async function loadAndUpdateProductColor(product, index, retryCount = 0) {
   return new Promise(function (resolve, reject) {
     try {
       googleVisionClient
         .imageProperties(product.photo)
         .then(results => {
           try {
-            const color = results[0].imagePropertiesAnnotation.dominantColors.colors[0].color;
-            productService.updateMainColor(product, color);
-            console.log("color loaded for " + index);
-            resolve(product);
+            const result = results[0];
+            if (result.error) {
+              // could occur when google can not access the URL
+              if (retryCount < 5) {
+                // retry it up to 5 times
+                loadAndUpdateProductColor(product, index, retryCount + 1).then(resolve).catch(reject);
+              } else {
+                reject(new Exception("can\'t get color for product#" + product.id + " ; google result : " + JSON.stringify(error)));
+              }
+            } else {
+              const color = results[0].imagePropertiesAnnotation.dominantColors.colors[0].color;
+              productService.updateMainColor(product, color);
+              console.log("color loaded for " + index);
+              resolve(product);
+            }
           } catch (error) {
             reject(error);
           }
@@ -121,7 +134,7 @@ async function loadAndUpdateProductColor(product, index) {
           reject(err);
         });
     } catch (error) {
-      //reject(error);
+      reject(error);
     }
   });
 }

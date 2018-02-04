@@ -14,11 +14,12 @@ async function create(data) {
 /**
  * update the main color of a product & compute its lab value
  * @param product
+ * @param color color in rgb as [r, g, b] where r, g, and b are an int between 0 and 255
  * @returns {Promise<void>}
  */
 async function updateMainColor(product, color) {
-  product.color = [color.red, color.green, color.blue];
-  product.colorLab = colourProximity.rgb2lab(product.color);
+  product.color = color ? [color.red, color.green, color.blue] : null;
+  product.colorLab = color ? colourProximity.rgb2lab(product.color) : null;
   await productRepo.save(product);
 }
 
