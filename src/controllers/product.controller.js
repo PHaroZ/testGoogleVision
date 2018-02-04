@@ -83,17 +83,19 @@ async function loadMainColors(req, res, next) {
     const queue = new RunQueue({
       maxConcurrency: 10
     });
-    const products = [];
+    let noQueued = 0;
     (await productService.list()).some(function (product, index) {
-      if (index >= limit) {
-        return true;
+      if (!product.color) {
+        queue.add(0, loadAndUpdateProductColor, [product]);
+        noQueued++;
+        if (noQueued >= limit) {
+          return true;
+        }
       }
-      products.push(product);
-      queue.add(0, loadAndUpdateProductColor, [product]);
     });
 
     await queue.run();
-    cu.resOk(res, products);
+    cu.resOk(res);
 
   } catch (error) {
     next(error);
@@ -102,16 +104,24 @@ async function loadMainColors(req, res, next) {
 
 async function loadAndUpdateProductColor(product) {
   return new Promise(function (resolve, reject) {
-    googleVisionClient
-      .imageProperties(product.photo)
-      .then(results => {
-        const color = results[0].imagePropertiesAnnotation.dominantColors.colors[0].color;
-        productService.updateMainColor(product, color);
-        resolve(product);
-      })
-      .catch(err => {
-        reject(err);
-      });
+    try {
+      googleVisionClient
+        .imageProperties(product.photo)
+        .then(results => {
+          try {
+            const color = results[0].imagePropertiesAnnotation.dominantColors.colors[0].color;
+            productService.updateMainColor(product, color);
+            resolve(product);
+          } catch (error) {
+            reject(error);
+          }
+        })
+        .catch(err => {
+          reject(err);
+        });
+    } catch (error) {
+      //reject(error);
+    }
   });
 }
 

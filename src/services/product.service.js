@@ -1,4 +1,6 @@
 const productRepo = require('../repos/product.repo');
+const colourProximity = require('colour-proximity');
+
 
 /**
  * create & save a new product
@@ -10,12 +12,13 @@ async function create(data) {
 }
 
 /**
- * update the main color of a product
+ * update the main color of a product & compute its lab value
  * @param product
  * @returns {Promise<void>}
  */
 async function updateMainColor(product, color) {
-  product.color = color;
+  product.color = [color.red, color.green, color.blue];
+  product.colorLab = colourProximity.rgb2lab(product.color);
   await productRepo.save(product);
 }
 

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@google-cloud/vision": "^0.15.0",
+    "colour-proximity": "0.0.2",
     "csv-streamify": "^3.0.4",
     "express": "^4.16.2",
     "nconf": "^0.10.0",
