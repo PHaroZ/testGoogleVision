@@ -49,6 +49,10 @@ async function list() {
   return Object.values(store);
 }
 
+async function getById(id) {
+  return store[id];
+}
+
 /**
  * @private
  * buffer store saving
@@ -89,4 +93,4 @@ async function persist() {
   });
 }
 
-module.exports = {init, clearAll, save, list};
+module.exports = {init, clearAll, save, list, getById};

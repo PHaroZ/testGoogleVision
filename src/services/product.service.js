@@ -41,6 +41,14 @@ async function list() {
 }
 
 /**
+ * return a product by it's id
+ * @returns {Promise<void>}
+ */
+async function getById(id) {
+  return productRepo.getById(id);
+}
+
+/**
  * clear all product
  * @returns {Promise<void>}
  */
@@ -48,4 +56,4 @@ async function clearAll() {
   return await productRepo.clearAll();
 }
 
-module.exports = {create, clearAll, countAll, list, updateMainColor};
+module.exports = {create, clearAll, countAll, list, updateMainColor, getById};

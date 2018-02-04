@@ -72,6 +72,13 @@ async function initFromCsv(req, res, next) {
   }
 }
 
+/**
+ * Compute main color of each product, for which it's unknown, via Google Cloud Vision API and persist it.
+ * @param req
+ * @param res
+ * @param next
+ * @returns {Promise<*|void>}
+ */
 async function loadMainColors(req, res, next) {
   const limit = req.query.limit === undefined ? null : parseInt(req.query.limit, 10);
   if (null !== limit && (isNaN(limit) || limit <= 0)) {
@@ -104,6 +111,33 @@ async function loadMainColors(req, res, next) {
   }
 }
 
+/**
+ * Suggest to N product which have the same color as the requested product
+ * @param req
+ * @param res
+ * @param next
+ * @returns {Promise<void>}
+ */
+async function suggestByColor(req, res, next) {
+  const productId = req.params.id;
+  const product = await productService.getById(productId);
+
+  if (!product) {
+    return cu.res4xx(res, 400, 'product "' + productId + '" is unknown');
+  }
+
+  //TODO
+
+  return [product];
+}
+
+/**
+ * @private
+ * @param product
+ * @param index
+ * @param retryCount
+ * @returns {Promise<any>}
+ */
 async function loadAndUpdateProductColor(product, index, retryCount = 0) {
   return new Promise(function (resolve, reject) {
     try {
@@ -139,4 +173,4 @@ async function loadAndUpdateProductColor(product, index, retryCount = 0) {
   });
 }
 
-module.exports = {initFromCsv, loadMainColors};
+module.exports = {initFromCsv, loadMainColors, suggestByColor};
