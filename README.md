@@ -3,10 +3,10 @@
 This aims to play with google vision API. The final goal is to provide an API which return products with the nearest main color of a reference product.
 
 A nodejs app which expose some REST endpoints.
-Data are load in memory and persisted to a single file.
+Data are loaded in memory and persisted to a single file.
 
 ## Prerequisites
-* Nodejs 8.+
+* Nodejs 8.+ and npm
 * A Google Cloud Platform account which can be used with Cloud Vision API, see https://cloud.google.com/vision/ for more details.
 
 ## Configuration
@@ -14,7 +14,7 @@ Configuration can be done via environement variables or via a json file called "
 Available options are :
 - **PORT** `number` port number where web service will be accessible, by default `3000`
 - **googleCloud:credentials** `path` required, file path which contains your Google Cloud API key, see https://cloud.google.com/docs/authentication/getting-started for more detail (corresponds to google's GOOGLE_APPLICATION_CREDENTIALS)
-- **googleCloud:maxConcurrency:vision** `number` maximum number of concurrent call to Google Cloud Vision
+- **googleCloud:maxConcurrency:vision** `number` maximum number of concurrent call to Google Cloud Vision, by default `5`
 - **repo:fs:persistDelay** `number` data persistence is deffered after modification by this delay (in order to avoid to much IO at bulk loading phase), by default `50` ms
 - **repo:fs:filePath** `path` file path where to persist data, a new file will be created, the directory structure must already exist. By default `/tmp/testGoogleVision.repo.json`
 
@@ -25,7 +25,7 @@ npm install ; npm start
 ```
 After that you have to
 1. load initial data with a call to _/api/private/product/initFromCsv_
-2. load main color from google vision API with a call to _/api/private/product/loadMainColors_
+2. load main color for all product from google vision API with a call to _/api/private/product/loadMainColors_
 
 And finally you can use the main public API _/api/public/product/suggestByColor/:id_
 
